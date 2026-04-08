@@ -1,8 +1,3 @@
-
-.env
-__pycache__/
-*.pyc
-orders.xlsx
 echo __pycache__/ > .gitignore
 echo .env >> .gitignore
 echo *.pyc >> .gitignore
