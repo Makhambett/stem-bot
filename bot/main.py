@@ -7,7 +7,7 @@ from bot.config import settings
 from bot.db import create_pool
 from bot.handlers import admin, registration, requests, start, stats
 from bot.services.manager_service import sync_default_staff
-
+from bot.handlers import applications as applications_handler
 
 async def main():
     logging.basicConfig(level=logging.INFO)
@@ -22,6 +22,7 @@ async def main():
     dp.include_router(registration.router)
     dp.include_router(requests.router)
     dp.include_router(stats.router)
+    dp.include_router(applications_handler.router)
 
     await sync_default_staff(bot)
     await dp.start_polling(bot)

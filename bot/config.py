@@ -2,7 +2,9 @@ import os
 from dataclasses import dataclass
 from dotenv import load_dotenv
 
+
 load_dotenv()
+
 
 @dataclass
 class Settings:
@@ -10,6 +12,7 @@ class Settings:
     admin_id: int = int(os.getenv("ADMIN_ID", "0"))
     managers_group_id: int = int(os.getenv("MANAGERS_GROUP_ID", "0"))
     database_url: str = os.getenv("DATABASE_URL", "")
+    backend_url: str = os.getenv("BACKEND_URL", "http://localhost:8000")
     manager_ids: list[int] = None
 
     def __post_init__(self):
@@ -19,5 +22,6 @@ class Settings:
             if value:
                 ids.append(int(value))
         self.manager_ids = ids
+
 
 settings = Settings()
