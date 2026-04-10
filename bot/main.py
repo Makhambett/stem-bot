@@ -2,7 +2,7 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
-
+from bot.handlers import admin, stats
 from bot.config import settings
 from bot.db import create_pool
 from bot.handlers import admin, registration, requests, start, stats
@@ -23,6 +23,8 @@ async def main():
     dp.include_router(requests.router)
     dp.include_router(stats.router)
     dp.include_router(applications_handler.router)
+    
+  
 
     await sync_default_staff(bot)
     await dp.start_polling(bot)

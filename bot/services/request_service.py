@@ -1,6 +1,6 @@
 from bot.keyboards.request_kb import in_progress_kb
 from bot.repositories.events import add_event
-from bot.repositories.managers import get_manager
+from bot.repositories.managers import get_manager, set_manager_busy
 from bot.repositories.requests import (
     close_request_atomic,
     create_request as repo_create_request,
@@ -25,8 +25,13 @@ async def take_request(request_id: int, manager_id: int):
     if not request:
         return {"ok": False, "message": "Заявка уже взята другим менеджером."}
 
+    # 🟢 Помечаем менеджера как занятого
+    await set_manager_busy(manager_id, True)
+
     manager = await get_manager(manager_id)
     manager_name = manager["name"] if manager else str(manager_id)
+    
+    # Добавляем событие о взятии заявки
     await add_event(request_id, manager_id, "taken", current["status"], "in_progress", None)
 
     return {
@@ -36,7 +41,7 @@ async def take_request(request_id: int, manager_id: int):
     }
 
 
-async def close_request(request_id: int, manager_id: int, final_status: str):
+async def close_request(request_id: int, manager_id: int, final_status: str, result_comment: str | None = None):
     if final_status not in {"success", "failed"}:
         return {"ok": False, "message": "Некорректный финальный статус."}
 
@@ -46,13 +51,13 @@ async def close_request(request_id: int, manager_id: int, final_status: str):
     if current["manager_telegram_id"] != manager_id:
         return {"ok": False, "message": "Только назначенный менеджер может завершить заявку."}
 
-    request = await close_request_atomic(request_id, manager_id, final_status)
+    request = await close_request_atomic(request_id, manager_id, final_status, result_comment)
     if not request:
         return {"ok": False, "message": "Не удалось завершить заявку."}
 
     manager = await get_manager(manager_id)
     manager_name = manager["name"] if manager else str(manager_id)
-    await add_event(request_id, manager_id, "closed", current["status"], final_status, None)
+    await add_event(request_id, manager_id, "closed", current["status"], final_status, result_comment)
 
     return {
         "ok": True,
