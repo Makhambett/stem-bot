@@ -110,3 +110,36 @@ def format_stats(stats: dict) -> str:
         card += f"\n📈 Конверсия: {success_rate}%"
         
     return card
+def format_daily_stats(stats: dict) -> str:
+    date_str = datetime.now().strftime("%d.%m.%Y")
+    text = f"📊 <b>Дневная статистика ({date_str})</b>\n\n"
+    text += f"🆕 Поступило заявок: {stats['total']}\n"
+    text += f"🟡 Взято в работу: {stats['in_progress']} ({round(stats['in_progress']/stats['total']*100) if stats['total'] else 0}%)\n"
+    text += f"✅ Успешно: {stats['success']}\n"
+    text += f"❌ Отказов: {stats['failed']}\n"
+    text += f"\n📈 Конверсия: <b>{stats['conversion']}%</b>"
+    return text
+
+
+def format_fail_reasons(reasons: list[dict]) -> str:
+    if not reasons:
+        return "❌ За неделю не было отказов с указанной причиной."
+    total = sum(r["cnt"] for r in reasons)
+    text = "📉 <b>Причины отказов (за 7 дней)</b>\n\n"
+    for i, r in enumerate(reasons, 1):
+        pct = round(r["cnt"] / total * 100)
+        text += f"{i}. {r['result_comment']}: <b>{r['cnt']}</b> ({pct}%)\n"
+    return text
+
+
+def format_top_managers(managers: list[dict]) -> str:
+    if not managers:
+        return "🏆 За неделю нет успешных сделок."
+    text = "🏆 <b>Топ менеджеров (за 7 дней)</b>\n\n"
+    medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"]
+    for i, m in enumerate(managers):
+        medal = medals[i] if i < len(medals) else f"{i+1}️⃣"
+        text += f"{medal} <b>{m['name']}</b>\n"
+        text += f"   ✅ Успешно: {m['success']} из {m['total']}\n"
+        text += f"   📈 Конверсия: {m['conversion']}%\n\n"
+    return text.strip()
